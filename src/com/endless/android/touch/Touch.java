@@ -16,12 +16,12 @@ import android.widget.ImageView;
 
 public class Touch extends Activity implements OnTouchListener {
 
-	//public static final String TAG = "Touch";
+	// public static final String TAG = "Touch";
 
-	static final float MIN_SCALE = 0.1f; // ×îĞ¡Ëõ·Å±ÈÀı
-	static final float MAX_SCALE = 4.0f; // ×î´óËõ·Å±ÈÀı
+	static final float MIN_ZOOM_SCALE = 0.1f;
+	static final float MAX_ZOOM_SCALE = 4.0f;
 
-	static final int NONE = 0; // ³õÊ¼×´Ì¬
+	static final int NONE = 0; // åˆå§‹çŠ¶æ€
 	static final int DRAG = 1;
 	static final int ZOOM = 2;
 
@@ -57,7 +57,7 @@ public class Touch extends Activity implements OnTouchListener {
 		mImageView.setOnTouchListener(this);
 
 		mDisplayMetrics = new DisplayMetrics();
-		getWindowManager().getDefaultDisplay().getMetrics(mDisplayMetrics); // »ñÈ¡ÆÁÄ»ĞÅÏ¢£¨·Ö±æÂÊµÈ£©
+		getWindowManager().getDefaultDisplay().getMetrics(mDisplayMetrics); // è·å–å±å¹•ä¿¡æ¯ï¼ˆåˆ†è¾¨ç‡ç­‰ï¼‰
 
 		initImageMatrix();
 		mImageView.setImageMatrix(matrix);
@@ -65,11 +65,11 @@ public class Touch extends Activity implements OnTouchListener {
 
 	public boolean onTouch(View v, MotionEvent event) {
 		switch (event.getActionMasked()) {
-		case MotionEvent.ACTION_DOWN: // Ö÷µã°´ÏÂ
+		case MotionEvent.ACTION_DOWN: // ä¸»ç‚¹æŒ‰ä¸‹
 			gestureMode = DRAG;
 			prevPoint.set(event.getX(), event.getY());
 			break;
-		case MotionEvent.ACTION_POINTER_DOWN: // ¸±µã°´ÏÂ
+		case MotionEvent.ACTION_POINTER_DOWN: // å‰¯ç‚¹æŒ‰ä¸‹
 			prevFingerDistance = getFingerDistance(event);
 			if (getFingerDistance(event) > MIN_FINGER_DISTANCE) {
 				gestureMode = ZOOM;
@@ -85,8 +85,10 @@ public class Touch extends Activity implements OnTouchListener {
 			} else if (gestureMode == ZOOM) {
 				float currentFingerDistance = getFingerDistance(event);
 				if (currentFingerDistance > MIN_FINGER_DISTANCE) {
-					float zoomScale = currentFingerDistance / prevFingerDistance;
-					matrix.postScale(zoomScale, zoomScale, midPoint.x, midPoint.y);
+					float zoomScale = currentFingerDistance
+							/ prevFingerDistance;
+					matrix.postScale(zoomScale, zoomScale, midPoint.x,
+							midPoint.y);
 					prevFingerDistance = currentFingerDistance;
 				}
 				checkImageViewSize();
@@ -102,17 +104,17 @@ public class Touch extends Activity implements OnTouchListener {
 	}
 
 	/**
-	 * ÏŞÖÆÍ¼Æ¬Ëõ·Å±ÈÀı£º²»ÄÜÌ«Ğ¡£¬Ò²²»ÄÜÌ«´ó
+	 * é™åˆ¶å›¾ç‰‡ç¼©æ”¾æ¯”ä¾‹ï¼šä¸èƒ½å¤ªå°ï¼Œä¹Ÿä¸èƒ½å¤ªå¤§
 	 */
 	private void checkImageViewSize() {
 		float p[] = new float[9];
 		matrix.getValues(p);
 		if (gestureMode == ZOOM) {
-			if (p[0] < MIN_SCALE) {
-				float tScale = MIN_SCALE / p[0];
+			if (p[0] < MIN_ZOOM_SCALE) {
+				float tScale = MIN_ZOOM_SCALE / p[0];
 				matrix.postScale(tScale, tScale, midPoint.x, midPoint.y);
-			} else if (p[0] > MAX_SCALE) {
-				float tScale = MAX_SCALE / p[0];
+			} else if (p[0] > MAX_ZOOM_SCALE) {
+				float tScale = MAX_ZOOM_SCALE / p[0];
 				matrix.postScale(tScale, tScale, midPoint.x, midPoint.y);
 			}
 		}
@@ -124,12 +126,12 @@ public class Touch extends Activity implements OnTouchListener {
 						/ (float) mBitmap.getWidth(),
 				(float) mDisplayMetrics.heightPixels
 						/ (float) mBitmap.getHeight()));
-		if (initImageScale < 1.0f) { // Í¼Æ¬±ÈÆÁÄ»´ó£¬ĞèÒªËõĞ¡
+		if (initImageScale < 1.0f) { // å›¾ç‰‡æ¯”å±å¹•å¤§ï¼Œéœ€è¦ç¼©å°
 			matrix.postScale(initImageScale, initImageScale);
 		}
 
 		RectF rect = new RectF(0, 0, mBitmap.getWidth(), mBitmap.getHeight());
-		matrix.mapRect(rect); // °´ initImageScale ËõĞ¡¾ØĞÎ£¬»òÕß²»±ä
+		matrix.mapRect(rect); // æŒ‰ initImageScale ç¼©å°çŸ©å½¢ï¼Œæˆ–è€…ä¸å˜
 
 		float dx = (mDisplayMetrics.widthPixels - rect.width()) / 2.0f;
 		float dy = (mDisplayMetrics.heightPixels - rect.height()) / 2.0f;
